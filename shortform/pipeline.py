@@ -197,6 +197,7 @@ def run(
     publishers: Mapping[str, Publisher],
     jobs_dir: str | Path | None = None,
     on_done: Callable[[str, PlatformRecord], None] | None = None,
+    on_start: Callable[[str], None] | None = None,
 ) -> Job:
     """queued 레코드만 게시한다. published/failed/unknown은 건드리지 않는다."""
     _require_approval(job)
@@ -205,6 +206,8 @@ def run(
         if rec.state != QUEUED:
             continue
         publisher = publishers.get(platform)
+        if on_start is not None:
+            on_start(platform)
         if publisher is None:
             _mark_missing_publisher(job, platform, jobs_dir)
         else:

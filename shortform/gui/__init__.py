@@ -1,0 +1,1 @@
+"""Local browser upload interface."""

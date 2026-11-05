@@ -6,9 +6,8 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-from . import pipeline
+from . import pipeline, service
 from .models import PUBLISHED, PlatformTarget
-from .publishers.mock import MockPublisher
 from .publishers.base import DefinitiveRejection
 
 EXIT_OK = 0
@@ -17,12 +16,14 @@ EXIT_INVALID = 2
 
 
 def _build_parser():
-    parser = argparse.ArgumentParser(prog="shortform-uploader", description="인자 없이 실행하면 대화형 업로드를 시작합니다.")
+    parser = argparse.ArgumentParser(prog="shortform-uploader", description="인자 없이 실행하면 대화형 업로드를 시작합니다.",
+                                     epilog="브라우저 화면: shortform-uploader gui · 계정 연결: shortform-uploader setup")
     sub = parser.add_subparsers(dest="command")
     upload = sub.add_parser("upload", help="대화형 업로드 (영상 끌어다 놓기, 캡션, 플랫폼 선택)")
     upload.add_argument("video", nargs="?", help="영상 파일 (생략하면 실행 후 끌어다 놓기)")
     upload.add_argument("--config", help="실제 계정용 TOML 설정 (없으면 연결된 계정 기본값 사용)")
     upload.add_argument("--jobs-dir", default=None)
+    sub.add_parser("gui", help="브라우저 업로드 화면 열기")
     sub.add_parser("accounts", help="계정 연결 상태 확인")
     setup = sub.add_parser("setup", help="처음 쓰는 사람을 위한 단계별 계정 연결 도우미")
     setup.add_argument("platforms", nargs="*", choices=("youtube", "instagram", "tiktok"), metavar="platform",
@@ -71,18 +72,7 @@ def _print_plan(video, targets):
             print(f"      {key}: {value!r}")
 
 
-def _publishers(targets):
-    # Lazy construction: dry-run never reads credentials or initiates OAuth/network.
-    from importlib import import_module
-    names = {"youtube": "YouTubePublisher", "instagram": "InstagramPublisher", "tiktok": "TikTokPublisher"}
-    result = {}
-    for p, target in targets.items():
-        if target.provider == "mock":
-            result[p] = MockPublisher(p)
-        else:
-            module = import_module(f"shortform.publishers.{target.provider}")
-            result[p] = getattr(module, names[target.provider])()
-    return result
+_publishers = service.publishers
 
 
 def _print_result(job, jobs_dir):
@@ -192,10 +182,7 @@ def _cmd_run(args):
     if input("위 내용으로 게시를 승인합니까? [y/N] ").strip().lower() not in ("y", "yes"):
         print("승인되지 않아 종료합니다.")
         return EXIT_OK
-    job = pipeline.create_job(video, targets, args.jobs_dir)
-    pipeline.approve(job, args.jobs_dir)
-    with pipeline.job_lock(job.id, args.jobs_dir):
-        pipeline.run(job, _publishers(targets), args.jobs_dir)
+    job = service.upload(service.UploadPlan(video, targets), args.jobs_dir, publishers_factory=_publishers)
     return _print_result(job, args.jobs_dir)
 
 
@@ -218,15 +205,15 @@ def _cmd_accounts():
     from .auth import TokenStore
     from .interactive import LABELS, PLATFORMS
     store = TokenStore()
+    connected = service.accounts(store)
     for platform in PLATFORMS:
-        token = store.load(platform)
-        account = (token or {}).get("account_id")
+        account = connected[platform]
         status = f"연결됨 (계정 {account})" if account else f"미연결 → shortform-uploader setup {platform}"
         print(f"{LABELS[platform]}: {status}")
     return EXIT_OK
 
 
-_COMMANDS = frozenset({"upload", "accounts", "setup", "run", "auth", "status", "retry"})
+_COMMANDS = frozenset({"gui", "upload", "accounts", "setup", "run", "auth", "status", "retry"})
 
 
 def main(argv: Sequence[str] | None = None):
@@ -238,6 +225,10 @@ def main(argv: Sequence[str] | None = None):
     try:
         if args.command in (None, "upload"):
             return _cmd_upload(args)
+        if args.command == "gui":
+            from .gui.server import run
+            run()
+            return EXIT_OK
         if args.command == "accounts":
             return _cmd_accounts()
         if args.command == "setup":
@@ -246,18 +237,12 @@ def main(argv: Sequence[str] | None = None):
         if args.command == "run":
             return _cmd_run(args)
         if args.command == "auth":
-            from .auth import AuthManager
-            AuthManager(args.platform).authorize()
+            service.connect(args.platform)
             print(f"{args.platform}: 인증 정보를 로컬에 저장했습니다.")
             return EXIT_OK
-        with pipeline.job_lock(args.job_id, args.jobs_dir):
-            job = pipeline.load_job(args.job_id, args.jobs_dir)
-            publishers = _publishers(job.targets)
-            if args.command == "status":
-                pipeline.refresh_status(job, publishers, args.jobs_dir)
-            else:
-                pipeline.retry(job, publishers, args.jobs_dir)
-            return _print_result(job, args.jobs_dir)
+        operation = service.status if args.command == "status" else service.retry
+        job = operation(args.job_id, args.jobs_dir, publishers_factory=_publishers)
+        return _print_result(job, args.jobs_dir)
     except (ValueError, OSError, RuntimeError, DefinitiveRejection) as exc:
         print(f"오류: {exc}", file=sys.stderr)
         return EXIT_INVALID

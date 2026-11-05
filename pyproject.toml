@@ -17,6 +17,9 @@ dependencies = []
 [project.scripts]
 shortform-uploader = "shortform.cli:main"
 
+[tool.setuptools.package-data]
+"shortform.gui" = ["*.html", "*.js", "*.css"]
+
 [project.optional-dependencies]
 dev = ["pytest"]
 

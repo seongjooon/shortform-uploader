@@ -1,6 +1,8 @@
 # Shortform Uploader
 
-완성된 세로 영상(MP4) 하나를 터미널에서 YouTube Shorts, Instagram Reels, TikTok에 한 번에 올리는 로컬 CLI입니다.
+완성된 세로 영상(MP4) 하나를 YouTube Shorts, Instagram Reels, TikTok에 올리는 로컬 도구입니다. 브라우저 업로드 화면과 터미널 명령을 제공합니다.
+
+> GUI는 현재 개발 중입니다. 이 기능이 포함된 버전을 설치한 경우 아래 안내로 실행할 수 있습니다. 계정 연결은 아직 터미널에서 진행합니다.
 
 ```text
 $ shortform-uploader
@@ -50,13 +52,14 @@ $ shortform-uploader
 - 플랫폼마다 업로드가 끝나면 터미널과 데스크톱 알림(macOS 알림 센터, Linux `notify-send`)으로 알려 줍니다.
 - 업로드 직전에 항상 최종 확인(`y`)을 받습니다.
 
-**처음 쓰는 순서는 딱 세 줄입니다.**
+**처음 사용하는 경우**, 아래 [설치](#1-설치) 순서대로 저장소를 복제하고 설치한 뒤 실행하세요.
 
 ```sh
-pipx install .                   # 1. 설치 (pipx가 없으면 먼저 brew install pipx, 자세히: 1장)
-shortform-uploader setup          # 2. 계정 연결: 단계마다 같이 진행하고, 막히면 원인을 찾아 줍니다
-shortform-uploader              # 3. 영상 올리기
+shortform-uploader setup   # 사용할 계정을 터미널에서 연결
+shortform-uploader gui     # 브라우저 업로드 화면 열기
 ```
+
+GUI에서는 연결 상태를 확인하고 영상을 검사·업로드할 수 있습니다. 계정 연결 화면은 아직 제공하지 않으며, 연결 후 GUI의 **연결 상태 새로고침**을 누르면 됩니다. 터미널에서 업로드하려면 `shortform-uploader`를 실행하세요.
 
 > **TikTok은 두 가지 방식이 있습니다.** (`shortform.toml`의 TikTok `privacy`로 고릅니다)
 > - `public` 등: 캡션·해시태그를 넣어 **바로 게시**(Direct Post). 단, TikTok 심사 전 앱은 **나만 보기로만** 올라가는 경우가 많고, 그러면 결과에 이유를 알려 줍니다.
@@ -88,13 +91,14 @@ git clone https://github.com/seongjooon/shortform-uploader.git && cd shortform-u
 python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
-shortform-uploader --help
+shortform-uploader setup  # 계정 연결 (최초 1회)
+shortform-uploader gui    # 브라우저에서 업로드 화면 열기
 ```
 
 `pipx`를 쓰는 경우 `pipx install .`으로 설치하면 가상환경을 활성화하지 않아도 어디서든 `shortform-uploader`를 실행할 수 있습니다.
 (`pipx`가 없으면 macOS에서 `brew install pipx`)
 
-설치가 끝나면 `shortform-uploader setup`으로 계정을 연결하세요.
+터미널을 새로 열었다면 프로젝트 폴더에서 `source .venv/bin/activate`를 다시 실행하세요. GUI를 닫으려면 실행 중인 터미널에서 `Ctrl+C`를 누릅니다. GUI에서 계정 연결은 아직 지원하지 않으므로 `shortform-uploader setup`으로 연결하세요. 브라우저가 자동으로 열리지 않으면 터미널에 표시된 주소를 브라우저에 직접 입력하세요.
 
 **선택:** `ffprobe`(FFmpeg에 포함)가 있으면 영상 길이·해상도·fps를 표시하고 플랫폼 규격도 미리 검사합니다.
 
@@ -334,7 +338,7 @@ shortform-uploader retry JOB_ID      # 확정 실패한 플랫폼만 다시 올�
 
 | 증상 | 원인과 해결 |
 |---|---|
-| `shortform-uploader: command not found` | 가상환경을 활성화(`source .venv/bin/activate`)하거나 `pipx install .`으로 설치 |
+| `shortform-uploader: command not found` | 프로젝트 폴더에서 `source .venv/bin/activate`로 가상환경을 활성화하세요. 설치하지 않았다면 [설치 순서](#1-설치)를 먼저 실행하세요. |
 | `pip install` 중 "Multiple top-level packages" | 오래된 버전입니다. 최신 코드로 받아 다시 설치 |
 | 선택 목록에 플랫폼이 안 보임 | `shortform-uploader accounts`로 연결 상태 확인. 설정 파일의 `account_id`가 다른지도 확인 |
 | Instagram: `no Instagram professional account is linked to an accessible Facebook Page` | 2단계의 **페이지 ↔ Instagram 연결**을 페이지 설정에서 직접 하세요 |

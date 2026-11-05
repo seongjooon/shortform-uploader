@@ -10,7 +10,7 @@ from collections.abc import Callable, Mapping
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
-from . import pipeline
+from . import service
 
 try:  # enables proper editing of multibyte (Korean) input in input(); absent on some platforms
     import readline  # noqa: F401
@@ -42,24 +42,9 @@ def clean_dropped_path(raw: str) -> Path:
     return Path(text).expanduser()
 
 
-def parse_hashtags(raw: str) -> list[str]:
-    tags: list[str] = []
-    seen: set[str] = set()
-    for token in re.split(r"[\s,]+", raw):
-        word = token.lstrip("#")
-        if word and word.lower() not in seen:
-            seen.add(word.lower())
-            tags.append(f"#{word}")
-    return tags
-
-
-def compose_caption(caption: str, hashtags: list[str]) -> str:
-    return "\n\n".join(part for part in (caption.strip(), " ".join(hashtags)) if part)
-
-
-def default_title(caption: str, video: Path) -> str:
-    first_line = next((line.strip() for line in caption.splitlines() if line.strip()), "")
-    return (first_line or video.stem)[:_YOUTUBE_TITLE_MAX]
+parse_hashtags = service.parse_hashtags
+compose_caption = service.compose_caption
+default_title = service.default_title
 
 
 def describe_video(video: Path) -> list[str]:
@@ -108,33 +93,7 @@ def notify(title: str, message: str) -> None:
         pass
 
 
-def available_targets(config_path: Path | None, store) -> tuple[dict[str, PlatformTarget], dict[str, str]]:
-    """Return publishable targets plus a reason for each platform that cannot be used."""
-    tokens = {p: store.load(p) for p in PLATFORMS}
-    unavailable: dict[str, str] = {}
-    if config_path is not None:
-        from .config import load_config
-        configured = load_config(config_path)
-        targets = {}
-        for p in PLATFORMS:
-            token = tokens[p]
-            if p not in configured:
-                unavailable[p] = "설정에서 꺼져 있음"
-            elif not token:
-                unavailable[p] = f"미연결 (shortform-uploader setup {p})"
-            elif token.get("account_id") != configured[p].account_id:
-                unavailable[p] = "연결된 계정이 설정의 account_id와 다름"
-            else:
-                targets[p] = configured[p]
-        return targets, unavailable
-    targets = {}
-    for p in PLATFORMS:
-        account_id = (tokens[p] or {}).get("account_id")
-        if account_id:
-            targets[p] = PlatformTarget(p, account_id, _DEFAULT_PRIVACY[p], {})
-        else:
-            unavailable[p] = f"미연결 (shortform-uploader setup {p})"
-    return targets, unavailable
+available_targets = service.available_targets
 
 
 def select_platforms(names: list[str], input_func: InputFunc, out: OutFunc) -> list[str]:
@@ -177,14 +136,6 @@ def _ask_video(input_func: InputFunc, out: OutFunc) -> Path:
             return video
         out(problem)
 
-
-def _apply_metadata(target: PlatformTarget, text: str, title: str) -> PlatformTarget:
-    metadata = {k: v for k, v in target.metadata.items() if k in ("made_for_kids", "share_to_feed")}
-    if target.provider == "youtube":
-        metadata.update(title=title, description=text)
-    else:
-        metadata["caption"] = text
-    return PlatformTarget(target.provider, target.account_id, target.privacy, metadata)
 
 
 _STATE_ICON = {PUBLISHED: "🎉", FAILED: "❌"}
@@ -241,7 +192,7 @@ def run_wizard(
     if "youtube" in names:
         suggested = default_title(caption, video)
         title = input_func(f"📺 YouTube 제목 [Enter: {suggested}]: ").strip()[:_YOUTUBE_TITLE_MAX] or suggested
-    selected = {p: _apply_metadata(targets[p], text, title) for p in names}
+    selected = service.plan(video, caption, hashtags, names, title, targets).targets
 
     out("\n📋 이렇게 올릴게요")
     out(f"  🎬 영상: {video}")
@@ -265,8 +216,11 @@ def run_wizard(
         out("👌 알겠어요. 올리지 않고 마칠게요.")
         return 0
 
-    job = pipeline.create_job(video, selected, jobs_dir)
-    pipeline.approve(job, jobs_dir)
+    job = None
+
+    def on_created(created):
+        nonlocal job
+        job = created
 
     def on_done(platform: str, rec: PlatformRecord) -> None:
         title_text, message = done_message(platform, rec, job.id)
@@ -274,8 +228,8 @@ def run_wizard(
         notifier(title_text, message)
 
     out("\n⏳ 업로드 중이에요. 영상 크기에 따라 몇 분 걸릴 수 있어요...")
-    with pipeline.job_lock(job.id, jobs_dir):
-        pipeline.run(job, publishers_factory(selected), jobs_dir, on_done=on_done)
+    job = service.upload(service.UploadPlan(video, selected), jobs_dir, publishers_factory=publishers_factory,
+                         on_done=on_done, on_created=on_created)
     tiktok = job.records.get("tiktok")
     if tiktok and tiktok.state == PUBLISHED and tiktok.delivery == "inbox" and text:
         # TikTok's inbox upload API has no caption field, so the user pastes it in the app.

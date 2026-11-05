@@ -581,7 +581,8 @@ def _connect(platform: str, coach: Coach, progress: Progress, auth_factory, stor
         coach.out(f"\n━━ 🔐 마지막 단계: {ICONS[platform]} {LABELS[platform]} 계정 연결 ━━")
         coach.out("  곧 브라우저가 열려요. 영상을 올릴 계정으로 로그인하고, 마지막 화면에서 '허용'을 눌러 주세요.")
         try:
-            auth_factory(platform, store=store, input_func=paste, browser_open=coach.open).authorize()
+            from .service import connect
+            connect(platform, store=store, auth_factory=auth_factory, input_func=paste, browser_open=coach.open)
         except CallbackProblem as exc:
             problem = exc.problem
         except AuthRequired as exc:
