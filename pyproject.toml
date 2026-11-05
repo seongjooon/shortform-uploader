@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["shortform*"]
+
+[project]
+name = "shortform"
+version = "0.1.0"
+description = "터미널에서 세로 영상을 YouTube Shorts, Instagram Reels, TikTok에 한 번에 올리는 CLI"
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+shortform = "shortform.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["live: explicitly enabled real API integration tests"]

@@ -1,0 +1,22 @@
+[defaults]
+title = "Shorts 제목"
+description = "YouTube 설명"
+caption = "릴스와 TikTok에 쓸 캡션"
+
+[platforms.youtube]
+enabled = true
+account_id = "UCxxxx"
+privacy = "private"
+title = "Shorts 제목 #shorts"
+made_for_kids = false
+
+[platforms.instagram]
+enabled = true
+account_id = "1784xxxx"
+caption = "릴스 캡션 #reels"
+share_to_feed = true
+
+[platforms.tiktok]
+enabled = true
+account_id = "open_id"
+caption = "앱에 붙여넣을 캡션"
