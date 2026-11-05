@@ -1,10 +1,10 @@
-# Shortform
+# Shortform Uploader
 
 완성된 세로 영상(MP4) 하나를 터미널에서 YouTube Shorts, Instagram Reels, TikTok에 한 번에 올리는 로컬 CLI입니다.
 
 ```text
-$ shortform
-🚀 shortform 업로드를 시작할게요!
+$ shortform-uploader
+🚀 shortform-uploader 업로드를 시작할게요!
   ✅ 📺 YouTube Shorts
   ✅ 📸 Instagram Reels
   ✅ 🎵 TikTok
@@ -54,8 +54,8 @@ $ shortform
 
 ```sh
 pipx install .                   # 1. 설치 (pipx가 없으면 먼저 brew install pipx, 자세히: 1장)
-shortform setup                  # 2. 계정 연결: 단계마다 같이 진행하고, 막히면 원인을 찾아 줍니다
-shortform                        # 3. 영상 올리기
+shortform-uploader setup          # 2. 계정 연결: 단계마다 같이 진행하고, 막히면 원인을 찾아 줍니다
+shortform-uploader              # 3. 영상 올리기
 ```
 
 > **TikTok은 두 가지 방식이 있습니다.** (`shortform.toml`의 TikTok `privacy`로 고릅니다)
@@ -84,17 +84,17 @@ shortform                        # 3. 영상 올리기
 필요한 것: **Python 3.11 이상**. 런타임 의존성은 표준 라이브러리뿐입니다.
 
 ```sh
-git clone https://github.com/seongjooon/shortform.git && cd shortform
+git clone https://github.com/seongjooon/shortform-uploader.git && cd shortform-uploader
 python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
-shortform --help
+shortform-uploader --help
 ```
 
-`pipx`를 쓰는 경우 `pipx install .`으로 설치하면 가상환경을 활성화하지 않아도 어디서든 `shortform`을 실행할 수 있습니다.
+`pipx`를 쓰는 경우 `pipx install .`으로 설치하면 가상환경을 활성화하지 않아도 어디서든 `shortform-uploader`를 실행할 수 있습니다.
 (`pipx`가 없으면 macOS에서 `brew install pipx`)
 
-설치가 끝나면 `shortform setup`으로 계정을 연결하세요.
+설치가 끝나면 `shortform-uploader setup`으로 계정을 연결하세요.
 
 **선택:** `ffprobe`(FFmpeg에 포함)가 있으면 영상 길이·해상도·fps를 표시하고 플랫폼 규격도 미리 검사합니다.
 
@@ -114,7 +114,7 @@ brew install ffmpeg   # macOS
 > **처음이라면 아래 내용을 읽지 말고 이것만 실행하세요.**
 >
 > ```sh
-> shortform setup
+> shortform-uploader setup
 > ```
 >
 > 2~4단계 전체를 한 단계씩 같이 진행합니다.
@@ -202,13 +202,13 @@ chmod 600 ~/.config/shortform/credentials.json
 
 ## 4. 계정 연결
 
-`shortform setup`을 썼다면 이미 끝난 단계입니다. 직접 하려면 사용할 플랫폼만 연결합니다.
+`shortform-uploader setup`을 썼다면 이미 끝난 단계입니다. 직접 하려면 사용할 플랫폼만 연결합니다.
 **실제 터미널에서** 실행하세요 (URL을 붙여 넣는 입력이 필요합니다).
 
 ```sh
-shortform auth youtube
-shortform auth instagram
-shortform auth tiktok
+shortform-uploader auth youtube
+shortform-uploader auth instagram
+shortform-uploader auth tiktok
 ```
 
 | 플랫폼 | 진행 방식 |
@@ -223,14 +223,14 @@ shortform auth tiktok
 연결 상태 확인:
 
 ```sh
-$ shortform accounts
+$ shortform-uploader accounts
 YouTube Shorts: 연결됨 (계정 UC...)
 Instagram Reels: 연결됨 (계정 1784...)
-TikTok: 미연결 → shortform setup tiktok
+TikTok: 미연결 → shortform-uploader setup tiktok
 ```
 
 토큰은 `~/.config/shortform/tokens/<플랫폼>.json`에 권한 0600으로 저장됩니다.
-YouTube·TikTok은 만료되면 자동 갱신합니다. Instagram 토큰이 만료되거나 권한이 철회되면 `shortform auth instagram`을 다시 실행하세요.
+YouTube·TikTok은 만료되면 자동 갱신합니다. Instagram 토큰이 만료되거나 권한이 철회되면 `shortform-uploader auth instagram`을 다시 실행하세요.
 
 ---
 
@@ -239,7 +239,7 @@ YouTube·TikTok은 만료되면 자동 갱신합니다. Instagram 토큰이 만�
 ### 대화형 (추천)
 
 ```sh
-shortform
+shortform-uploader
 ```
 
 | 순서 | 입력 | 참고 |
@@ -273,7 +273,7 @@ cp shortform.example.toml shortform.toml
 ```toml
 [platforms.youtube]
 enabled = true
-account_id = "UC..."        # shortform accounts에 나온 계정 ID
+account_id = "UC..."        # shortform-uploader accounts에 나온 계정 ID
 privacy = "private"         # private | unlisted | public
 made_for_kids = false
 
@@ -296,9 +296,9 @@ privacy = "inbox"           # inbox | public | followers | friends | private
 ### 스크립트용 비대화형 실행
 
 ```sh
-shortform run clip.mp4                      # shortform.toml 사용, 플랫폼만 대화형으로 선택
-shortform run clip.mp4 --only youtube,tiktok
-shortform run clip.mp4 --dry-run            # 검증과 계획만 출력, 업로드 안 함
+shortform-uploader run clip.mp4              # shortform.toml 사용, 플랫폼만 대화형으로 선택
+shortform-uploader run clip.mp4 --only youtube,tiktok
+shortform-uploader run clip.mp4 --dry-run            # 검증과 계획만 출력, 업로드 안 함
 ```
 
 이 모드는 캡션을 `shortform.toml`의 `[defaults]` / 플랫폼별 값에서 가져옵니다.
@@ -310,8 +310,8 @@ shortform run clip.mp4 --dry-run            # 검증과 계획만 출력, 업로
 업로드할 때마다 작업 기록(job)이 `jobs/` 폴더에 저장됩니다. 결과를 알 수 없거나 실패했으면 job ID로 확인합니다.
 
 ```sh
-shortform status JOB_ID     # 원격 상태 조회 (다시 올리지 않음)
-shortform retry JOB_ID      # 확정 실패한 플랫폼만 다시 올림
+shortform-uploader status JOB_ID     # 원격 상태 조회 (다시 올리지 않음)
+shortform-uploader retry JOB_ID      # 확정 실패한 플랫폼만 다시 올림
 ```
 
 | 결과 | 의미와 대응 |
@@ -322,7 +322,7 @@ shortform retry JOB_ID      # 확정 실패한 플랫폼만 다시 올림
 | 확인 필요 (`unknown`) | 서버에 도달했는지 모름. 먼저 `status`로 확인 |
 | `needs_manual` | 플랫폼 앱에서 직접 확인하세요. 새로 올리면 중복될 수 있습니다 |
 
-- 같은 영상을 `shortform`으로 다시 실행하면 **새 job**이 만들어집니다. 중복 게시를 피하려면 기존 job을 먼저 확인하세요.
+- 같은 영상을 `shortform-uploader`으로 다시 실행하면 **새 job**이 만들어집니다. 중복 게시를 피하려면 기존 job을 먼저 확인하세요.
 - 승인 후 영상이나 문구를 바꾸면 retry는 거부됩니다.
 - 기록 위치는 `--jobs-dir` 또는 `SHORTFORM_JOBS_DIR`로 바꿀 수 있습니다. 기록에 업로드 복구 URL이 들어 있으니 공유하지 마세요.
 
@@ -334,19 +334,19 @@ shortform retry JOB_ID      # 확정 실패한 플랫폼만 다시 올림
 
 | 증상 | 원인과 해결 |
 |---|---|
-| `shortform: command not found` | 가상환경을 활성화(`source .venv/bin/activate`)하거나 `pipx install .`으로 설치 |
+| `shortform-uploader: command not found` | 가상환경을 활성화(`source .venv/bin/activate`)하거나 `pipx install .`으로 설치 |
 | `pip install` 중 "Multiple top-level packages" | 오래된 버전입니다. 최신 코드로 받아 다시 설치 |
-| 선택 목록에 플랫폼이 안 보임 | `shortform accounts`로 연결 상태 확인. 설정 파일의 `account_id`가 다른지도 확인 |
+| 선택 목록에 플랫폼이 안 보임 | `shortform-uploader accounts`로 연결 상태 확인. 설정 파일의 `account_id`가 다른지도 확인 |
 | Instagram: `no Instagram professional account is linked to an accessible Facebook Page` | 2단계의 **페이지 ↔ Instagram 연결**을 페이지 설정에서 직접 하세요 |
 | Instagram: OAuth 중 계정 전환 화면이 반복 | Facebook에서 페이지가 아니라 **개인 계정**으로 전환한 상태에서 인증 |
 | TikTok: `error_type=redirect_uri` | `credentials.json`의 `redirect_uri`가 개발자 앱(Sandbox라면 Sandbox)에 등록한 값과 정확히 같은지 확인 |
 | TikTok: `unauthorized_client` | 심사 전 앱이면 **Sandbox의** client key/secret을 쓰고, 계정을 Target users에 추가 |
 | TikTok: 바로 게시했는데 나만 보기로 올라감 | 심사 전 앱의 제한입니다. 공개하려면 TikTok 앱 심사가 필요합니다 |
-| TikTok: `scope_not_authorized` | Direct Post를 켠 뒤 `shortform setup tiktok`으로 다시 연결 |
+| TikTok: `scope_not_authorized` | Direct Post를 켠 뒤 `shortform-uploader setup tiktok`으로 다시 연결 |
 | TikTok: "Maximum number of attempts reached" | 본인 확인 시도 횟수 초과로 잠긴 상태입니다. **Resend를 더 누르지 말고** 몇 시간 기다린 뒤 한 번만 다시 시도 |
 | `ffprobe를 찾을 수 없어...` 경고 | 규격 검사만 건너뜀. 정확히 검사하려면 FFmpeg 설치 |
 | 알림이 안 뜸 | macOS 시스템 설정 → 알림에서 *스크립트 편집기* 알림을 허용. 터미널 출력은 항상 남습니다 |
-| 인증 오류(`AuthRequired`) | 토큰 만료·철회. `shortform auth <플랫폼>` 재실행 |
+| 인증 오류(`AuthRequired`) | 토큰 만료·철회. `shortform-uploader auth <플랫폼>` 재실행 |
 
 플랫폼 규격(사전 검사 기준):
 
@@ -373,7 +373,7 @@ python -m pytest -q
 
 ```text
 shortform/
-  cli.py           명령 정의 (shortform, upload, accounts, auth, run, status, retry)
+  cli.py           명령 정의 (shortform-uploader, upload, accounts, auth, run, status, retry)
   interactive.py   대화형 업로드 (경로 인식, 캡션·해시태그, 플랫폼 선택, 알림)
   pipeline.py      job 생성·승인·실행·복구 (플랫폼별 상태 기록)
   preflight.py     업로드 전 로컬 영상 검사 (ffprobe)
