@@ -17,7 +17,7 @@ EXIT_INVALID = 2
 
 
 def _build_parser():
-    parser = argparse.ArgumentParser(prog="shortform", description="인자 없이 실행하면 대화형 업로드를 시작합니다.")
+    parser = argparse.ArgumentParser(prog="shortform-uploader", description="인자 없이 실행하면 대화형 업로드를 시작합니다.")
     sub = parser.add_subparsers(dest="command")
     upload = sub.add_parser("upload", help="대화형 업로드 (영상 끌어다 놓기, 캡션, 플랫폼 선택)")
     upload.add_argument("video", nargs="?", help="영상 파일 (생략하면 실행 후 끌어다 놓기)")
@@ -221,7 +221,7 @@ def _cmd_accounts():
     for platform in PLATFORMS:
         token = store.load(platform)
         account = (token or {}).get("account_id")
-        status = f"연결됨 (계정 {account})" if account else f"미연결 → shortform setup {platform}"
+        status = f"연결됨 (계정 {account})" if account else f"미연결 → shortform-uploader setup {platform}"
         print(f"{LABELS[platform]}: {status}")
     return EXIT_OK
 
@@ -231,7 +231,7 @@ _COMMANDS = frozenset({"upload", "accounts", "setup", "run", "auth", "status", "
 
 def main(argv: Sequence[str] | None = None):
     argv = list(sys.argv[1:] if argv is None else argv)
-    # `shortform <영상>` (typed, then the file dragged in) starts the upload wizard with that video.
+    # `shortform-uploader <영상>` (typed, then the file dragged in) starts the upload wizard with that video.
     if argv and argv[0] not in _COMMANDS and not argv[0].startswith("-"):
         argv.insert(0, "upload")
     args = _build_parser().parse_args(argv)

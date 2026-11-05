@@ -237,8 +237,8 @@ def _explain_init_error(code: str) -> str:
             "심사 전 TikTok 앱은 비공개 계정에만 바로 게시할 수 있어요. TikTok 앱에서 계정을 비공개로 바꾸거나, "
             "설정의 TikTok privacy를 'inbox'로 바꿔 받은편지함으로 보내세요.",
         "privacy_level_option_mismatch": "TikTok이 허용하지 않는 공개 범위예요. TikTok privacy를 'private'로 바꿔 보세요.",
-        "scope_not_authorized": "TikTok 권한이 부족해요. `shortform setup tiktok`으로 다시 연결해 주세요.",
-        "access_token_invalid": "TikTok 로그인이 만료됐어요. `shortform setup tiktok`으로 다시 연결해 주세요.",
+        "scope_not_authorized": "TikTok 권한이 부족해요. `shortform-uploader setup tiktok`으로 다시 연결해 주세요.",
+        "access_token_invalid": "TikTok 로그인이 만료됐어요. `shortform-uploader setup tiktok`으로 다시 연결해 주세요.",
         "reached_active_user_cap": "TikTok 앱의 하루 사용자 한도에 도달했어요. 내일 다시 시도해 주세요.",
     }
     return messages.get(code, f"TikTok이 게시를 거부했어요 (오류 코드: {code})")

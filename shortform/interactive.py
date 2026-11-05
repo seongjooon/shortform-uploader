@@ -121,7 +121,7 @@ def available_targets(config_path: Path | None, store) -> tuple[dict[str, Platfo
             if p not in configured:
                 unavailable[p] = "설정에서 꺼져 있음"
             elif not token:
-                unavailable[p] = f"미연결 (shortform setup {p})"
+                unavailable[p] = f"미연결 (shortform-uploader setup {p})"
             elif token.get("account_id") != configured[p].account_id:
                 unavailable[p] = "연결된 계정이 설정의 account_id와 다름"
             else:
@@ -133,7 +133,7 @@ def available_targets(config_path: Path | None, store) -> tuple[dict[str, Platfo
         if account_id:
             targets[p] = PlatformTarget(p, account_id, _DEFAULT_PRIVACY[p], {})
         else:
-            unavailable[p] = f"미연결 (shortform setup {p})"
+            unavailable[p] = f"미연결 (shortform-uploader setup {p})"
     return targets, unavailable
 
 
@@ -199,7 +199,7 @@ def done_message(platform: str, rec: PlatformRecord, job_id: str) -> tuple[str, 
         return f"{label} 업로드 완료", f"{message}\n{rec.note}" if rec.note else message
     if rec.state == FAILED:
         return f"{label} 업로드 실패", rec.error or "원인을 확인하세요."
-    return f"{label} 확인 필요", f"결과를 알 수 없습니다. shortform status {job_id}"
+    return f"{label} 확인 필요", f"결과를 알 수 없습니다. shortform-uploader status {job_id}"
 
 
 def run_wizard(
@@ -214,13 +214,13 @@ def run_wizard(
     video: str | None = None,
     copy: Callable[[str], bool] = copy_to_clipboard,
 ) -> int:
-    out("🚀 shortform 업로드를 시작할게요!")
+    out("🚀 shortform-uploader 업로드를 시작할게요!")
     targets, unavailable = available_targets(config_path, store)
     for p in PLATFORMS:
         mark = "✅" if p in targets else "⚪"
         out(f"  {mark} {ICONS[p]} {LABELS[p]}" + (f"  {unavailable[p]}" if p in unavailable else ""))
     if not targets:
-        out("\n🔌 아직 연결된 계정이 없어요. 먼저 `shortform setup`으로 계정을 연결해 주세요. 단계별로 같이 할게요! 🙌")
+        out("\n🔌 아직 연결된 계정이 없어요. 먼저 `shortform-uploader setup`으로 계정을 연결해 주세요. 단계별로 같이 할게요! 🙌")
         return 2
 
     given = clean_dropped_path(video) if video else None

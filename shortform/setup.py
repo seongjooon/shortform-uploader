@@ -1,4 +1,4 @@
-"""`shortform setup`: a patient, friendly guide that stays with the user until each account connects."""
+"""`shortform-uploader setup`: a patient, friendly guide that stays with the user until each account connects."""
 
 from __future__ import annotations
 
@@ -248,7 +248,7 @@ def _youtube_steps() -> list[Step]:
         Step("project", "Google Cloud 프로젝트 만들기",
              "Google에 이 프로그램을 등록할 '폴더'를 하나 만드는 거예요.",
              ["업로드할 YouTube 채널의 Google 계정으로 로그인해 주세요.",
-              "프로젝트 이름에 아무 이름(예: shortform)이나 넣고 '만들기'를 눌러 주세요."],
+              "프로젝트 이름에 아무 이름(예: shortform-uploader)이나 넣고 '만들기'를 눌러 주세요."],
              "오른쪽 위에 '프로젝트를 만들었습니다' 알림이 뜨면 성공이에요.",
              "https://console.cloud.google.com/projectcreate",
              help=["이미 만들어 둔 프로젝트가 있으면 그걸 써도 돼요.", "결제 정보나 카드 등록은 필요 없어요."]),
@@ -262,7 +262,7 @@ def _youtube_steps() -> list[Step]:
                    "다른 프로젝트가 선택돼 있으면 맨 위 프로젝트 이름을 눌러 바꿔 주세요."]),
         Step("consent", "로그인 화면 설정과 테스트 사용자 등록",
              "나중에 로그인할 때 보일 화면을 만들고, 내 계정을 '써도 되는 사람'으로 등록하는 거예요.",
-             ["'시작하기'를 누르고 앱 이름(예: shortform)과 내 이메일을 넣어 주세요.",
+             ["'시작하기'를 누르고 앱 이름(예: shortform-uploader)과 내 이메일을 넣어 주세요.",
               "대상(사용자 유형)은 '외부(External)'를 골라 주세요.",
               "왼쪽 메뉴 '대상(Audience)' → '테스트 사용자' → '사용자 추가'에 업로드할 Google 계정 이메일을 넣어 주세요."],
              "테스트 사용자 목록에 내 이메일이 보이면 성공이에요.",
@@ -270,7 +270,7 @@ def _youtube_steps() -> list[Step]:
              help=["테스트 사용자를 빼먹으면 나중에 '액세스 차단됨' 화면이 나와요. 이 단계가 제일 중요해요.",
                    "'앱 게시'나 '검증 신청'은 하지 않아도 돼요."]),
         Step("client", "프로그램용 열쇠(클라이언트) 만들기",
-             "이 프로그램이 Google에 '나 shortform이야'라고 알릴 때 쓰는 열쇠를 받는 거예요.",
+             "이 프로그램이 Google에 '나 shortform-uploader야'라고 알릴 때 쓰는 열쇠를 받는 거예요.",
              ["애플리케이션 유형에서 '데스크톱 앱'을 골라 주세요.",
               "이름은 그대로 두고 '만들기'를 눌러 주세요.",
               "완료 창의 'JSON 다운로드'를 누르고, 받은 파일을 이 터미널 창으로 끌어다 놓은 뒤 Enter를 눌러 주세요."],
@@ -353,7 +353,7 @@ def _tiktok_steps() -> list[Step]:
         Step("app", "TikTok 개발자 앱 만들기",
              "이 프로그램을 TikTok에 등록하는 거예요.",
              ["TikTok for Developers에 로그인(처음이면 가입)해 주세요.",
-              "'Connect an app' → 'Individual' → 앱 이름(예: shortform) 입력 → 'Create app'을 눌러 주세요.",
+              "'Connect an app' → 'Individual' → 앱 이름(예: shortform-uploader) 입력 → 'Create app'을 눌러 주세요.",
               "왼쪽 'Products' → 'Add products'에서 'Login Kit'과 'Content Posting API'를 추가해 주세요."],
              "Products 아래에 Login Kit과 Content Posting API가 보이면 성공이에요.",
              "https://developers.tiktok.com/apps",
@@ -712,7 +712,7 @@ def run_setup(
     store = store or TokenStore()
     coach = Coach(input_func, out, open_url, copy)
     progress = Progress(store)
-    out("안녕하세요! shortform 계정 연결을 도와드릴게요. 😊")
+    out("안녕하세요! shortform-uploader 계정 연결을 도와드릴게요. 😊")
     out("처음 한 번만 하면 되고, 플랫폼마다 10~15분 정도 걸려요.")
     out("화면에 나오는 순서대로 하나씩 따라 하시면 돼요. 실수해도 괜찮아요, 언제든 다시 할 수 있어요.")
     out("  · 막히면 언제든 '?'를 입력하세요. 확인할 것들을 알려 드려요.")
@@ -732,10 +732,10 @@ def run_setup(
                     continue
             setup_platform(platform, coach, progress, auth_factory, store)
     except SetupPaused:
-        out("\n💾 알겠어요, 여기까지 저장해 뒀어요. 언제든 `shortform setup`을 다시 실행하면 이어서 할 수 있어요. 👋")
+        out("\n💾 알겠어요, 여기까지 저장해 뒀어요. 언제든 `shortform-uploader setup`을 다시 실행하면 이어서 할 수 있어요. 👋")
         return 0
     out("\n🎉 연결이 모두 끝났어요. 정말 수고 많으셨어요!")
     for p in PLATFORMS:
         out(f"  {'✅' if store.load(p) else '⚪'} {ICONS[p]} {LABELS[p]}")
-    out("🚀 이제 터미널에 `shortform`을 입력하면 영상을 올릴 수 있어요.")
+    out("🚀 이제 터미널에 `shortform-uploader`를 입력하면 영상을 올릴 수 있어요.")
     return 0

@@ -155,7 +155,7 @@ def test_wizard_without_accounts_exits_early(video):
     code, _publishers, _notes, out = _wizard(video, [], tokens={})
 
     assert code == 2
-    assert any("shortform setup" in line for line in out)
+    assert any("shortform-uploader setup" in line for line in out)
 
 
 def test_pipeline_run_calls_on_done_for_each_platform(approved_job):
