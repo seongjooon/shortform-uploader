@@ -4,29 +4,45 @@
 
 ```text
 $ shortform
-shortform 업로드
-  ✓ YouTube Shorts
-  ✓ Instagram Reels
-  ✓ TikTok
+🚀 shortform 업로드를 시작할게요!
+  ✅ 📺 YouTube Shorts
+  ✅ 📸 Instagram Reels
+  ✅ 🎵 TikTok
 
-영상 파일을 이 창에 끌어다 놓고 Enter를 누르세요: /Users/me/Movies/run\ day.mp4
-  파일: run day.mp4 (18.4 MB)
-  길이: 32.0초
-  해상도: 1080x1920 (세로)
+🎬 영상 파일을 이 창에 끌어다 놓고 Enter를 눌러 주세요: /Users/me/Movies/run\ day.mp4
+  🎞️  파일: run day.mp4 (12.4 MB)
+  ⏱️  길이: 15.9초
+  📐 해상도: 1080x1920 (세로)
+  🎚️  프레임: 30fps
 
-캡션: 오늘의 러닝 기록
-해시태그 (공백 또는 쉼표로 구분): 러닝, run shorts
+✍️  캡션: 오늘의 러닝 기록
+#️⃣  해시태그 (공백이나 쉼표로 구분, # 없이 써도 돼요): 러닝, run shorts
 
-업로드할 플랫폼을 고르세요:
-  1. YouTube Shorts
-  2. Instagram Reels
-  3. TikTok
-번호를 쉼표로 구분해 입력 (예: 1,2 / Enter: 전체): 1,2
-YouTube 제목 [Enter: 오늘의 러닝 기록]:
+🌍 어디에 올릴까요?
+  1. 📺 YouTube Shorts
+  2. 📸 Instagram Reels
+  3. 🎵 TikTok
+번호를 쉼표로 구분해 입력 (예: 1,2 / Enter: 전체):
+📺 YouTube 제목 [Enter: 오늘의 러닝 기록]:
 
-위 내용으로 업로드할까요? [y/N] y
-[YouTube Shorts 업로드 완료] https://www.youtube.com/shorts/...
-[Instagram Reels 업로드 완료] https://www.instagram.com/reel/...
+📋 이렇게 올릴게요
+  🎬 영상: /Users/me/Movies/run day.mp4
+  🌍 플랫폼: 📺 YouTube Shorts, 📸 Instagram Reels, 🎵 TikTok
+  📺 YouTube 제목: 오늘의 러닝 기록
+  ✍️  캡션:
+오늘의 러닝 기록
+
+#러닝 #run #shorts
+
+👉 이대로 올릴까요? [y/N] y
+
+⏳ 업로드 중이에요. 영상 크기에 따라 몇 분 걸릴 수 있어요...
+🎉 [YouTube Shorts 업로드 완료] https://www.youtube.com/shorts/...
+🎉 [Instagram Reels 업로드 완료] https://www.instagram.com/reel/...
+🎉 [TikTok 전송 완료] TikTok 앱 받은편지함에서 영상을 열고 게시하세요.
+
+🎵 TikTok 앱 받은편지함에서 영상을 열고, 캡션 칸에 붙여 넣어 주세요.
+📋 캡션과 해시태그를 클립보드에 복사해 뒀어요.
 ```
 
 - 영상은 터미널 창에 끌어다 놓으면 경로가 자동으로 인식됩니다.
