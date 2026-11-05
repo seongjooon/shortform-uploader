@@ -6,16 +6,16 @@
 
 ## 빠른 시작
 
-Python 3.11이 필요합니다. 터미널에서 다음 명령을 순서대로 실행하세요.
+Python 3.11 이상과 [pipx](https://pipx.pypa.io/stable/installation/)가 필요합니다. pipx로 설치하면 새 터미널에서도 가상환경을 따로 켜지 않고 실행할 수 있습니다.
 
 ```sh
 git clone https://github.com/seongjooon/shortform-uploader.git
 cd shortform-uploader
-python3.11 -m venv .venv
-source .venv/bin/activate
-python -m pip install -e .
+pipx install .
 shortform-uploader gui
 ```
+
+macOS에서 pipx가 없다면 먼저 `brew install pipx`와 `pipx ensurepath`를 실행하고 터미널을 다시 여세요. 다른 운영체제는 [pipx 설치 안내](https://pipx.pypa.io/stable/installation/)를 참고하세요.
 
 1. 브라우저에서 사용할 채널의 **연결하기**를 눌러 안내에 따라 계정을 연결합니다.
 2. 브라우저에 열린 화면에 MP4 영상을 놓고 검사 결과를 확인합니다.
@@ -23,12 +23,13 @@ shortform-uploader gui
 
 계정 연결에는 각 플랫폼의 개발자 앱 설정과 브라우저 로그인이 필요합니다. 연결이 끝나면 업로드 화면으로 돌아옵니다. GUI를 종료하려면 실행 중인 터미널에서 `Ctrl+C`를 누릅니다.
 
-새 터미널에서 다시 실행할 때는 저장소 폴더로 이동한 뒤 아래 명령을 사용하세요.
+다음부터는 어느 폴더에서든 아래 명령으로 GUI를 열 수 있습니다.
 
 ```sh
-source .venv/bin/activate
 shortform-uploader gui
 ```
+
+**터미널 CLI도 사용할 수 있습니다.** `shortform-uploader`를 실행하면 터미널에서 영상 업로드를 안내하며, `shortform-uploader setup`으로 계정을 연결할 수도 있습니다. 자세한 사용법은 [업로드하기](#5-업로드하기)를 참고하세요.
 
 > TikTok은 기본적으로 앱의 받은편지함으로 전송됩니다. 앱에서 영상을 열고 게시를 완료하세요. 직접 게시 설정과 플랫폼별 준비 사항은 아래 상세 설명을 참고하세요.
 
@@ -51,18 +52,29 @@ shortform-uploader gui
 
 필요한 것: **Python 3.11 이상**. 런타임 의존성은 표준 라이브러리뿐입니다.
 
+### 권장: pipx로 설치
+
 ```sh
-git clone https://github.com/seongjooon/shortform-uploader.git && cd shortform-uploader
+git clone https://github.com/seongjooon/shortform-uploader.git
+cd shortform-uploader
+pipx install .
+shortform-uploader gui
+```
+
+pipx는 앱을 별도 환경에 설치하고 실행 명령을 PATH에 연결합니다. 명령을 찾을 수 없다면 `pipx ensurepath`를 실행하고 터미널을 다시 열어 주세요. `pipx`를 설치하는 방법은 [공식 설치 안내](https://pipx.pypa.io/stable/installation/)를 참고하세요.
+
+### 대안: 프로젝트 가상환경
+
+pipx를 사용하지 않는다면 저장소 폴더에서 다음과 같이 설치할 수 있습니다.
+
+```sh
 python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
-shortform-uploader gui    # 브라우저에서 계정 연결 및 업로드
+shortform-uploader gui
 ```
 
-`pipx`를 쓰는 경우 `pipx install .`으로 설치하면 가상환경을 활성화하지 않아도 어디서든 `shortform-uploader`를 실행할 수 있습니다.
-(`pipx`가 없으면 macOS에서 `brew install pipx`)
-
-터미널을 새로 열었다면 프로젝트 폴더에서 `source .venv/bin/activate`를 다시 실행하세요. GUI를 닫으려면 실행 중인 터미널에서 `Ctrl+C`를 누릅니다. 계정은 GUI에서 연결할 수 있으며, 터미널을 선호하면 `shortform-uploader setup`도 사용할 수 있습니다. 브라우저가 자동으로 열리지 않으면 터미널에 표시된 주소를 브라우저에 직접 입력하세요.
+이 방식은 실행 명령이 `.venv/bin`에 설치됩니다. 새 터미널에서는 프로젝트 폴더에서 `source .venv/bin/activate`를 다시 실행해야 합니다. GUI를 닫으려면 실행 중인 터미널에서 `Ctrl+C`를 누릅니다. 브라우저가 자동으로 열리지 않으면 터미널에 표시된 주소를 직접 입력하세요.
 
 **선택:** `ffprobe`(FFmpeg에 포함)가 있으면 영상 길이·해상도·fps를 표시하고 플랫폼 규격도 미리 검사합니다.
 
@@ -79,7 +91,7 @@ brew install ffmpeg   # macOS
 각 플랫폼에 **본인 개발자 앱**을 한 번 만들어야 합니다. 이 CLI는 앱 생성이나 심사 신청을 대신하지 않습니다.
 쓰지 않을 플랫폼은 건너뛰어도 됩니다.
 
-> **처음이라면 아래 내용을 읽지 말고 이것만 실행하세요.**
+> **터미널에서 연결하려면 다음 명령을 실행하세요.**
 >
 > ```sh
 > shortform-uploader setup
