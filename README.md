@@ -1,71 +1,37 @@
 # Shortform Uploader
 
-완성된 세로 영상(MP4) 하나를 YouTube Shorts, Instagram Reels, TikTok에 올리는 로컬 도구입니다. 브라우저 업로드 화면과 터미널 명령을 제공합니다.
+하나의 MP4 영상을 YouTube Shorts, Instagram Reels, TikTok에 올리는 로컬 업로드 도구입니다.
 
-> GUI는 현재 개발 중입니다. 이 기능이 포함된 버전을 설치한 경우 아래 안내로 실행할 수 있습니다. 계정 연결은 아직 터미널에서 진행합니다.
+![shortform-uploader 브라우저 업로드 화면](docs/images/gui-upload.png)
 
-```text
-$ shortform-uploader
-🚀 shortform-uploader 업로드를 시작할게요!
-  ✅ 📺 YouTube Shorts
-  ✅ 📸 Instagram Reels
-  ✅ 🎵 TikTok
+## 빠른 시작
 
-🎬 영상 파일을 이 창에 끌어다 놓고 Enter를 눌러 주세요: /Users/me/Movies/run\ day.mp4
-  🎞️  파일: run day.mp4 (12.4 MB)
-  ⏱️  길이: 15.9초
-  📐 해상도: 1080x1920 (세로)
-  🎚️  프레임: 30fps
-
-✍️  캡션: 오늘의 러닝 기록
-#️⃣  해시태그 (공백이나 쉼표로 구분, # 없이 써도 돼요): 러닝, run shorts
-
-🌍 어디에 올릴까요?
-  1. 📺 YouTube Shorts
-  2. 📸 Instagram Reels
-  3. 🎵 TikTok
-번호를 쉼표로 구분해 입력 (예: 1,2 / Enter: 전체):
-📺 YouTube 제목 [Enter: 오늘의 러닝 기록]:
-
-📋 이렇게 올릴게요
-  🎬 영상: /Users/me/Movies/run day.mp4
-  🌍 플랫폼: 📺 YouTube Shorts, 📸 Instagram Reels, 🎵 TikTok
-  📺 YouTube 제목: 오늘의 러닝 기록
-  ✍️  캡션:
-오늘의 러닝 기록
-
-#러닝 #run #shorts
-
-👉 이대로 올릴까요? [y/N] y
-
-⏳ 업로드 중이에요. 영상 크기에 따라 몇 분 걸릴 수 있어요...
-🎉 [YouTube Shorts 업로드 완료] https://www.youtube.com/shorts/...
-🎉 [Instagram Reels 업로드 완료] https://www.instagram.com/reel/...
-🎉 [TikTok 전송 완료] TikTok 앱 받은편지함에서 영상을 열고 게시하세요.
-
-🎵 TikTok 앱 받은편지함에서 영상을 열고, 캡션 칸에 붙여 넣어 주세요.
-📋 캡션과 해시태그를 클립보드에 복사해 뒀어요.
-```
-
-- 영상은 터미널 창에 끌어다 놓으면 경로가 자동으로 인식됩니다.
-- 해시태그는 `#`을 붙이지 않아도 되고, 중복은 자동으로 빠집니다.
-- 플랫폼마다 업로드가 끝나면 터미널과 데스크톱 알림(macOS 알림 센터, Linux `notify-send`)으로 알려 줍니다.
-- 업로드 직전에 항상 최종 확인(`y`)을 받습니다.
-
-**처음 사용하는 경우**, 아래 [설치](#1-설치) 순서대로 저장소를 복제하고 설치한 뒤 실행하세요.
+Python 3.11이 필요합니다. 터미널에서 다음 명령을 순서대로 실행하세요.
 
 ```sh
-shortform-uploader setup   # 사용할 계정을 터미널에서 연결
-shortform-uploader gui     # 브라우저 업로드 화면 열기
+git clone https://github.com/seongjooon/shortform-uploader.git
+cd shortform-uploader
+python3.11 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
+shortform-uploader setup
+shortform-uploader gui
 ```
 
-GUI에서는 연결 상태를 확인하고 영상을 검사·업로드할 수 있습니다. 계정 연결 화면은 아직 제공하지 않으며, 연결 후 GUI의 **연결 상태 새로고침**을 누르면 됩니다. 터미널에서 업로드하려면 `shortform-uploader`를 실행하세요.
+1. 터미널에서 `setup` 안내를 따라 사용할 계정을 연결합니다.
+2. 브라우저에 열린 화면에 MP4 영상을 놓고 검사 결과를 확인합니다.
+3. 캡션과 게시 채널을 선택하고, 내용을 확인한 뒤 업로드합니다.
 
-> **TikTok은 두 가지 방식이 있습니다.** (`shortform.toml`의 TikTok `privacy`로 고릅니다)
-> - `public` 등: 캡션·해시태그를 넣어 **바로 게시**(Direct Post). 단, TikTok 심사 전 앱은 **나만 보기로만** 올라가는 경우가 많고, 그러면 결과에 이유를 알려 줍니다.
-> - `inbox`(기본값): TikTok 앱 **받은편지함**으로만 보냅니다. 캡션은 API로 넣을 수 없어서, 클립보드에 복사해 드리면 앱에서 붙여 넣고 게시합니다.
+계정 연결 화면은 아직 제공하지 않습니다. GUI를 연 뒤 터미널에서 계정을 연결했다면 화면의 **연결 상태 새로고침**을 누르세요. GUI를 종료하려면 실행 중인 터미널에서 `Ctrl+C`를 누릅니다.
 
-포함하지 않는 것: 영상 편집·생성, 예약 게시, 여러 계정 동시 관리.
+새 터미널에서 다시 실행할 때는 저장소 폴더로 이동한 뒤 아래 명령을 사용하세요.
+
+```sh
+source .venv/bin/activate
+shortform-uploader gui
+```
+
+> TikTok은 기본적으로 앱의 받은편지함으로 전송됩니다. 앱에서 영상을 열고 게시를 완료하세요. 직접 게시 설정과 플랫폼별 준비 사항은 아래 상세 설명을 참고하세요.
 
 ---
 
