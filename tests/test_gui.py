@@ -90,3 +90,43 @@ def test_preflight_errors_block_plan(client, monkeypatch):
     assert video["checks"]["errors"]["youtube"]
     data = {"video_id": video["id"], "caption": "", "hashtags": "", "title": "", "platforms": ["youtube"]}
     assert request("POST", "/api/plans", json.dumps(data), headers)[0] == 400
+
+
+def test_setup_steps_and_auth_flow(client, tmp_path, monkeypatch):
+    from shortform import service
+    from shortform.auth import TokenStore
+    from shortform.setup import Progress
+    app, host, request = client
+    app.store = TokenStore(tmp_path / 'auth')
+    headers = {"Cookie": "shortform_session=" + app.token, "Origin": "http://" + host}
+    status, _, raw = request("GET", "/api/setup/tiktok/steps", headers=headers)
+    assert status == 200 and json.loads(raw)["steps"]
+    def post(action, data):
+        return request("POST", "/api/setup/tiktok/" + action, json.dumps(data), headers)
+    assert post("step", {"step": "client_key", "value": "bad"})[0] == 400
+    assert "client_key" not in Progress(app.store).done_steps("tiktok")
+    Progress(app.store).save_creds("tiktok", {"redirect_uri": "https://example.com/callback", "client_key": "private-key", "client_secret": "private-secret"})
+    def connect(platform, *, store, browser_open, input_func):
+        browser_open("https://example.com/authorize")
+        assert input_func("url") == "https://example.com/callback?code=test"
+        store.save(platform, {"account_id": "account", "access_token": "private-token"})
+    monkeypatch.setattr(service, "connect", connect)
+    assert post("start", {})[0] == 202
+    for _ in range(100):
+        _, _, raw = request("GET", "/api/setup/tiktok/auth", headers=headers)
+        state = json.loads(raw)
+        if state["state"] == "callback":
+            break
+        time.sleep(.01)
+    assert state["state"] == "callback"
+    assert post("start", {})[0] == 400
+    assert post("callback", {"url": "https://example.com/callback?code=test"})[0] == 200
+    for _ in range(100):
+        _, _, raw = request("GET", "/api/setup/tiktok/auth", headers=headers)
+        if json.loads(raw)["state"] == "done":
+            break
+        time.sleep(.01)
+    assert json.loads(raw)["state"] == "done"
+    _, _, steps = request("GET", "/api/setup/tiktok/steps", headers=headers)
+    assert b"private-key" not in steps and b"private-secret" not in steps and b"private-token" not in steps
+    assert b"private-token" not in raw

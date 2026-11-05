@@ -14,15 +14,14 @@ cd shortform-uploader
 python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
-shortform-uploader setup
 shortform-uploader gui
 ```
 
-1. 터미널에서 `setup` 안내를 따라 사용할 계정을 연결합니다.
+1. 브라우저에서 사용할 채널의 **연결하기**를 눌러 안내에 따라 계정을 연결합니다.
 2. 브라우저에 열린 화면에 MP4 영상을 놓고 검사 결과를 확인합니다.
 3. 캡션과 게시 채널을 선택하고, 내용을 확인한 뒤 업로드합니다.
 
-계정 연결 화면은 아직 제공하지 않습니다. GUI를 연 뒤 터미널에서 계정을 연결했다면 화면의 **연결 상태 새로고침**을 누르세요. GUI를 종료하려면 실행 중인 터미널에서 `Ctrl+C`를 누릅니다.
+계정 연결에는 각 플랫폼의 개발자 앱 설정과 브라우저 로그인이 필요합니다. 연결이 끝나면 업로드 화면으로 돌아옵니다. GUI를 종료하려면 실행 중인 터미널에서 `Ctrl+C`를 누릅니다.
 
 새 터미널에서 다시 실행할 때는 저장소 폴더로 이동한 뒤 아래 명령을 사용하세요.
 
@@ -57,14 +56,13 @@ git clone https://github.com/seongjooon/shortform-uploader.git && cd shortform-u
 python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
-shortform-uploader setup  # 계정 연결 (최초 1회)
-shortform-uploader gui    # 브라우저에서 업로드 화면 열기
+shortform-uploader gui    # 브라우저에서 계정 연결 및 업로드
 ```
 
 `pipx`를 쓰는 경우 `pipx install .`으로 설치하면 가상환경을 활성화하지 않아도 어디서든 `shortform-uploader`를 실행할 수 있습니다.
 (`pipx`가 없으면 macOS에서 `brew install pipx`)
 
-터미널을 새로 열었다면 프로젝트 폴더에서 `source .venv/bin/activate`를 다시 실행하세요. GUI를 닫으려면 실행 중인 터미널에서 `Ctrl+C`를 누릅니다. GUI에서 계정 연결은 아직 지원하지 않으므로 `shortform-uploader setup`으로 연결하세요. 브라우저가 자동으로 열리지 않으면 터미널에 표시된 주소를 브라우저에 직접 입력하세요.
+터미널을 새로 열었다면 프로젝트 폴더에서 `source .venv/bin/activate`를 다시 실행하세요. GUI를 닫으려면 실행 중인 터미널에서 `Ctrl+C`를 누릅니다. 계정은 GUI에서 연결할 수 있으며, 터미널을 선호하면 `shortform-uploader setup`도 사용할 수 있습니다. 브라우저가 자동으로 열리지 않으면 터미널에 표시된 주소를 브라우저에 직접 입력하세요.
 
 **선택:** `ffprobe`(FFmpeg에 포함)가 있으면 영상 길이·해상도·fps를 표시하고 플랫폼 규격도 미리 검사합니다.
 

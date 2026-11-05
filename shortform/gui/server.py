@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import queue
 import secrets
 import tempfile
 import threading
@@ -32,10 +33,81 @@ class App:
         self.videos = {}
         self.plans = {}
         self.uploads = {}
+        self.auth_sessions = {}
         self.lock = threading.Lock()
 
     def targets(self):
         return service.available_targets(self.config_path, self.store)
+
+    def setup_data(self, platform):
+        from ..setup import Progress, _FIXED
+        if platform not in service.PLATFORMS:
+            raise ValueError("알 수 없는 플랫폼")
+        progress = Progress(self.store)
+        creds = progress.creds(platform)
+        done = progress.done_steps(platform)
+        steps = []
+        for step in service.setup_steps(platform):
+            # Only the registered redirect URI or a fixed public string can be shown.
+            copy_value = step.copy
+            if copy_value == "{redirect_uri}":
+                copy_value = str(creds.get("redirect_uri", ""))
+            steps.append({"id": step.id, "title": step.title, "why": step.why.replace("주소는 이미 복사해 뒀어요.", "아래 주소를 복사해 주세요.").replace("필요한 권한 목록은 복사해 뒀어요.", "필요한 권한 목록을 아래에서 복사해 주세요."),
+                          "actions": (["Google Cloud에서 데스크톱 앱 클라이언트를 만든 뒤 클라이언트 ID를 복사해 주세요."] if platform == "youtube" and step.id == "client" else step.actions), "success": step.success, "url": step.url,
+                          "copy": copy_value, "help": step.help, "prompt": ("클라이언트 ID를 붙여 넣어 주세요:" if platform == "youtube" and step.id == "client" else step.prompt),
+                          "secret": step.id in ("secret", "app_secret", "client_secret"),
+                          "done": step.id in done})
+        return {"steps": steps, "connected": bool(self.store.load(platform))}
+
+    def start_auth(self, platform):
+        from ..setup import Progress, _has_app_values
+        if platform not in service.PLATFORMS or not _has_app_values(platform, Progress(self.store).creds(platform)):
+            raise ValueError("앱 설정을 먼저 완료하세요")
+        with self.lock:
+            previous = self.auth_sessions.get(platform)
+            if previous and previous["state"] in ("starting", "waiting", "callback", "processing"):
+                raise ValueError("이미 연결이 진행 중입니다")
+            session = {"state": "starting", "url": None, "error": None, "queue": queue.Queue(maxsize=1)}
+            self.auth_sessions[platform] = session
+        def run_auth():
+            def open_url(url):
+                with self.lock:
+                    session["url"] = url
+                    session["state"] = "waiting" if platform == "youtube" else "callback"
+            def callback(_prompt):
+                try:
+                    return session["queue"].get(timeout=300)
+                except queue.Empty:
+                    raise ValueError("연결 시간이 초과되었습니다") from None
+            try:
+                service.connect(platform, store=self.store, browser_open=open_url, input_func=callback)
+                Progress(self.store).mark(platform, None)
+                with self.lock:
+                    session["state"] = "done"
+                    session["url"] = None
+            except Exception:
+                with self.lock:
+                    session["state"] = "error"
+                    session["url"] = None
+                    session["error"] = "연결하지 못했습니다. 앱 설정과 권한을 확인한 뒤 다시 시도하세요."
+        threading.Thread(target=run_auth, daemon=True).start()
+
+    def auth_status(self, platform):
+        with self.lock:
+            session = self.auth_sessions.get(platform)
+            if not session:
+                return {"state": "idle", "url": None, "error": None}
+            return {key: session[key] for key in ("state", "url", "error")}
+
+    def auth_callback(self, platform, callback):
+        if not isinstance(callback, str) or not callback.startswith(("http://", "https://")):
+            raise ValueError("주소를 확인하세요")
+        with self.lock:
+            session = self.auth_sessions.get(platform)
+            if not session or session["state"] != "callback":
+                raise ValueError("연결이 진행 중이 아닙니다")
+            session["state"] = "processing"
+            session["queue"].put_nowait(callback)
 
     def run_upload(self, upload_id, plan):
         state = self.uploads[upload_id]
@@ -128,6 +200,18 @@ def make_handler(app):
                     return self.reply(200, {"available": list(targets), "unavailable": unavailable})
                 except (ValueError, OSError):
                     return self.reply(400, {"error": "계정 설정을 읽지 못했습니다"})
+            if url.path.startswith("/api/setup/"):
+                parts = url.path.strip("/").split("/")
+                if len(parts) != 4 or parts[2] not in service.PLATFORMS:
+                    return self.reply(404, {"error": "찾을 수 없습니다"})
+                try:
+                    if parts[3] == "steps":
+                        return self.reply(200, app.setup_data(parts[2]))
+                    if parts[3] == "auth":
+                        return self.reply(200, app.auth_status(parts[2]))
+                except (ValueError, OSError):
+                    return self.reply(400, {"error": "연결 설정을 읽지 못했습니다"})
+                return self.reply(404, {"error": "찾을 수 없습니다"})
             if url.path.startswith("/api/uploads/"):
                 upload_id = url.path.removeprefix("/api/uploads/")
                 with app.lock:
@@ -147,6 +231,27 @@ def make_handler(app):
                 data = json.loads(self.rfile.read(length))
                 if not isinstance(data, dict):
                     raise ValueError("요청이 올바르지 않습니다")
+                if self.path.startswith("/api/setup/"):
+                    parts = self.path.strip("/").split("/")
+                    if len(parts) != 4 or parts[2] not in service.PLATFORMS:
+                        raise ValueError("알 수 없는 플랫폼")
+                    platform, action = parts[2:]
+                    from ..setup import Progress, _FIXED
+                    if platform in _FIXED:
+                        Progress(app.store).save_creds(platform, _FIXED[platform])
+                    if action == "step":
+                        step_id, value = data.get("step"), data.get("value", "")
+                        if not isinstance(step_id, str) or not isinstance(value, str):
+                            raise ValueError("잘못된 입력")
+                        error = service.submit_step(platform, step_id, value, store=app.store)
+                        return self.reply(400, {"error": error}) if error else self.reply(200, {"ok": True})
+                    if action == "start":
+                        app.start_auth(platform)
+                        return self.reply(202, {"ok": True})
+                    if action == "callback":
+                        app.auth_callback(platform, data.get("url"))
+                        return self.reply(200, {"ok": True})
+                    raise ValueError("알 수 없는 요청")
                 if self.path == "/api/plans":
                     return self.prepare(data)
                 if self.path == "/api/uploads":
